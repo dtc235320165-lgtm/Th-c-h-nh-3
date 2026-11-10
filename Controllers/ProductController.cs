@@ -14,10 +14,14 @@ namespace thuchanh3.Controllers
             new Product() {Id = 3, Name = "Samsung Galaxys26", Price = 500, Description = "Samsung Galaxy s26", CategoryId = "3"},
         };
         // GET: ProductController
-        public ActionResult Index()
+        public ActionResult Index(string? searchString)
         {
-
-            return View(products);
+            var products = Data.Products.AsQueryable();
+            if(!string.IsNullOrEmpty(searchString))
+            {
+                products = products.Where(p => p.Name.Contains(searchString, StringComparison.Ordinal));
+            }
+            return View(products.Select(ToViewModel).ToList());
         }
 
         // GET: ProductController/Details/5
@@ -76,7 +80,7 @@ namespace thuchanh3.Controllers
 
             existingProduct.Name = product.Name;
             return RedirectToAction(nameof(Index));
-        }
+        },
 
         // GET: ProductController/Delete/5
         public ActionResult Delete(int id)
@@ -101,9 +105,36 @@ namespace thuchanh3.Controllers
             }
             products.Remove(product);
             return RedirectToAction(nameof(Index));
-        }   
-             
+        }
+        private static ProductViewModel ToViewModel(Product product)
+        {
+            return new ProductViewModel
+            {
+                Id = product.Id,
+                Name = product.Name,
+                Price = product.Price,
+                Description = product.Description,
+                CategoryName = DataSeeds.categories.FirstOrDefault(c => c.Id == product.CategoryId)?.Name ?? string.Empty
+            };
+        }
+
+        public string GetDatapath(string file) => $"Data\\{file}";
+
+        public void Upload(Book book, IFormFile file)
+        {
+            if(file != null)
+            {
+                var path = GetDatapath(file.FileName);
+                using (var stream = new FileStream(path, FileMode.Create))
+                {
+                    file.CopyTo(stream);
+                    book.DataFile = file.FileName;
+                }
             }
         }
+            };
+        }
+    
+        
     
 

@@ -6,16 +6,17 @@ namespace thuchanh3.Controllers
 {
     public class CategoryController : Controller
     {
-        //gia lap csdl
+        private readonly ILogger<CategoryController> _logger;
         public static List<Category> categories = new List<Category>()
-        {
-          new Category() {Id = 1, Name = "Laptop"},
-          new Category() {Id = 2, Name = "Phone"},
-          new Category() {Id = 3, Name = "Tablet"},
-
+            {
+            new Category() { Id = 1, Name = "Laptop" },
+            new Category() { Id = 2, Name = "Smartphone" },
+            new Category() { Id = 3, Name = "Phụ kiện" },
         };
-        
-
+        public CategoryController(ILogger<CategoryController> logger)
+        {
+             _logger = logger;
+        }
         // GET: CategoryController
         [HttpGet]
         public ActionResult Index()
@@ -45,9 +46,14 @@ namespace thuchanh3.Controllers
         [ValidateAntiForgeryToken]
         public ActionResult Create(Category category)
         {
-            category.Id = categories.Count + 1;
-            categories.Add(category);
-            return RedirectToAction (nameof(Index));
+            if (ModelState.IsValid)
+            {
+               
+                category.Id = categories.Count + 1;
+                categories.Add(category);
+                    return RedirectToAction(nameof(Index));
+                }
+                return View(category);
 
         }
 
